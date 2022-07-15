@@ -1,7 +1,9 @@
 """
 ETL for data coming from Bank of Canada API
 """
-from typing import Union
+import sys
+
+from typing import Union, Dict, Any
 
 import requests
 
@@ -21,3 +23,16 @@ class ApiConnector:
 
         else:
             self.api_url = self.api_url_template.format(start_date, end_date)
+
+    def fetch_data(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Fetch fx data based on start and end dates provided in the constructor
+        :return: JSON data retrieved from the API
+        """
+        response = requests.get(self.api_url)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f">>> ERROR: request returned status code: {response.status_code}")
+            print(response.json())
+            sys.exit()
