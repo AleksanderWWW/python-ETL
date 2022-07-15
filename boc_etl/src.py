@@ -44,7 +44,7 @@ class ApiConnector:
         Setter method for start date
         """
         if isinstance(new_start, date):
-            new_start_str = new_start.strftime("%Y-%m-%d")
+            new_start_str = new_start.strftime(self._DATE_FMT)
             self.start_date = new_start_str
         else:
             raise TypeError(f"Expected new start date as date, got {type(new_start)} instead.")
@@ -57,7 +57,7 @@ class ApiConnector:
         Setter method for end date
         """
         if isinstance(new_end, date):
-            new_end_str = new_end.strftime("%Y-%m-%d")
+            new_end_str = new_end.strftime(self._DATE_FMT)
             self.end_date = new_end_str
         else:
             raise TypeError(f"Expected new end date as date, got {type(new_end)} instead.")
