@@ -20,6 +20,11 @@ class ApiConnectorTest(unittest.TestCase):
 
         self.assertEqual(api_conn.api_url, correct_url)
 
+    def test_json_data_have_correct_length(self):
+        api_conn = ApiConnector(self.url, self.start_date, self.end_date)
+        data = api_conn.fetch_data()["observations"]
+        self.assertEqual(len(data), 4)
+
 
 if __name__ == "__main__":
     unittest.main()
