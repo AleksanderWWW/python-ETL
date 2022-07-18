@@ -1,3 +1,7 @@
+"""
+Test suite for API connection part of the ETL process
+"""
+
 import unittest
 
 from datetime import date, timedelta
