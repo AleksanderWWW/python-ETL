@@ -1,6 +1,7 @@
 """
 ETL for data coming from Bank of Canada API
 """
+import json
 import sys
 
 
@@ -12,7 +13,8 @@ import requests
 
 class ApiConnector:
     """
-    Class providing methods to connect to Bank of Canada API and extract the FX USD/CAD data
+    Class providing methods to connect to Bank of Canada API and extract the FX USD/CAD data.
+    This class encapsulates the EXTRACT part of the ETL process.
     """
     _DATE_FMT = "%Y-%m-%d"
 
@@ -78,3 +80,25 @@ class ApiConnector:
             print(f">>> ERROR: request returned status code: {response.status_code}")
             print(response.json())
             sys.exit()
+
+
+class BOCDataTransform:
+    """
+    Objects of this type deal with data extracted from BOC servers.
+    They will receive raw JSON-styled objects as input.
+    As an output they will be able to produce structured table-like
+    dataframes ready to be loaded into a data wharehouse.
+
+    This class encapsulates the TRANSFORM part of the ETL process.
+    """
+
+    def __init__(self, raw_data: dict) -> None:
+        self._data = raw_data
+
+    def set_data(self, new_data: dict) -> None:
+        self._data = new_data
+
+    def get_data(self) -> dict:
+        return self._data
+
+    
