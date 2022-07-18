@@ -1,10 +1,12 @@
 """
 ETL for data coming from Bank of Canada API
 """
+
+import os
 import json
 import sys
 
-
+from pathlib import Path
 from datetime import date, datetime
 from typing import (
     Union, 
@@ -16,6 +18,31 @@ from typing import (
 
 import petl
 import requests
+
+
+def load_expenses(path_to_expenses: Union[bytes, str, os.PathLike]) -> petl.Table:
+    """
+    Loading expenses table from expenses excel file.
+
+    If file not found raises FileNotFoundError.
+
+    :path_to_expenses: path identifier to the expenses table source file
+    :returns: petl-style data table 
+    """
+
+    if not isinstance(path_to_expenses, Path):
+        path_to_expenses = Path(path_to_expenses)
+
+    if not path_to_expenses.exists:
+        raise FileNotFoundError(f"File {path_to_expenses} does not exist.")
+    
+    loading_mode = {
+        "xlsx": petl.io.fromxlsx,
+        "xls": petl.io.fromxls,
+        "csv": petl.io.fromcsv
+    }[path_to_expenses.suffix]
+
+    return loading_mode(str(path_to_expenses))
 
 
 class ApiConnector:
