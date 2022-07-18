@@ -10,3 +10,6 @@ with open("config.yaml", "r", encoding="utf-8") as config_fp:
 
 def main():
     ...
+
+if __name__ == "__main__":
+    main()
