@@ -5,9 +5,16 @@ import json
 import sys
 
 
-from datetime import date
-from typing import Union, Dict, Any
+from datetime import date, datetime
+from typing import (
+    Union, 
+    Dict, 
+    Any, 
+    Tuple, 
+    List
+)
 
+import petl
 import requests
 
 
@@ -81,24 +88,55 @@ class ApiConnector:
             print(response.json())
             sys.exit()
 
+    # TODO: method to dump fetched data to a JSON file
+
 
 class BOCDataTransform:
     """
     Objects of this type deal with data extracted from BOC servers.
     They will receive raw JSON-styled objects as input.
-    As an output they will be able to produce structured table-like
-    dataframes ready to be loaded into a data wharehouse.
+    As an output they will be able to produce table-like
+    dataf structures ready to be loaded into a data wharehouse.
 
     This class encapsulates the TRANSFORM part of the ETL process.
     """
 
     def __init__(self, raw_data: dict) -> None:
-        self._data = raw_data
+        self._raw_data = raw_data
+        try:
+            self._data = raw_data["observations"]
+        except KeyError as e:
+            raise KeyError("Provided data lacks the appropriate key (observations)") from e
 
     def set_data(self, new_data: dict) -> None:
-        self._data = new_data
+        self._raw_data = new_data
+        self._data = new_data["observations"]
 
     def get_data(self) -> dict:
-        return self._data
+        return self._data["observations"]
+
+    def _parse_data(self) -> Tuple[List]:
+        boc_dates = []
+        boc_rates = []
+
+        for item in self._data:
+            boc_dates.append(
+                datetime.strptime(item["d"], "%Y-%m-%d")
+            )
+
+            boc_rates.append(
+                item["FXUSDCAD"]["v"]
+            )
+
+        return boc_dates, boc_rates
+
+    def create_table(self) -> petl.Table:
+        dates, rates = self._parse_data()
+        table = petl.fromcolumns([dates, rates], header=['date','rate'])
+
+        return table
+
+
+    
 
     
