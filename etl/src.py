@@ -87,12 +87,10 @@ class Extract:
         :return: JSON data retrieved from the API
         """
         response = requests.get(self.api_url)
-        if response.status_code == 200:
-            return 200, response.json()
-        else:
-            print(response.json())
+        if response.status_code != 200:
             print(f">>> ERROR: request returned status code: {response.status_code}")
-            return response.status_code, response.json()
+        
+        return response.status_code, response.json()
 
     def save_raw_data(self, data: dict, failed=False):
         today = date.today().strftime(self._DATE_FMT)
