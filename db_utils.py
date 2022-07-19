@@ -9,7 +9,7 @@ def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
-        print(sqlite3.version)
+        print("SQLTE3 connection open")
     except Error as e:
         print(e)
     
@@ -28,6 +28,7 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
     finally:
+        print("Closing database connection")
         conn.close()
 
 
