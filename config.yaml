@@ -1,3 +1,7 @@
 BOC:
   startDate: 2020-01-11
+  endDate: 2020-12-30
   url: https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json?start_date={}&end_date={}
+
+DB:
+  path_to_db: db\expenses.db

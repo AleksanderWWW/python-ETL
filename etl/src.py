@@ -20,45 +20,17 @@ import petl
 import dropbox
 import requests
 
-
-def download_expenses(dbx: dropbox.Dropbox) -> None:
-    # TODO logging of metadata
-    dbx.files_download_to_file("data/expenses.xlsx", "/expenses.xlsx")
-
-
-def extract_expenses(path_to_expenses: Union[bytes, str, os.PathLike] = "data/expenses.xlsx") -> petl.Table:
-    """
-    Extracting expenses table from expenses excel file.
-
-    :param path_to_expenses: path identifier to the expenses table source file
-    :returns: petl-style data table with expenses data
-    :raies FileNotFoundError: if designated file does not exist 
-    """
-
-    if not isinstance(path_to_expenses, Path):
-        path_to_expenses = Path(path_to_expenses)
-
-    if not path_to_expenses.exists():
-        raise FileNotFoundError(f"File {path_to_expenses} does not exist.")
-    
-    loading_mode = {
-        ".xlsx": petl.io.fromxlsx,
-        ".xls": petl.io.fromxls,
-        ".csv": petl.io.fromcsv
-    }[path_to_expenses.suffix]
-
-    return loading_mode(str(path_to_expenses))
-
-
-class ApiConnector:
+class Extract:
     """
     Class providing methods to connect to Bank of Canada API and extract the FX USD/CAD data.
     This class encapsulates the EXTRACT part of the ETL process.
     """
     _DATE_FMT = "%Y-%m-%d"
 
-    def __init__(self, api_url: str, start_date: date, end_date: Union[date, None] = None):
+    def __init__(self, api_url: str, dbx: dropbox.Dropbox,
+                 start_date: date, end_date: Union[date, None] = None):
         self.api_url_template = api_url
+        self.dbx = dbx
 
         try:
             self.start_date = start_date.strftime(self._DATE_FMT)
@@ -116,12 +88,13 @@ class ApiConnector:
         """
         response = requests.get(self.api_url)
         if response.status_code == 200:
-            return response.json()
+            return 200, response.json()
         else:
             print(response.json())
-            raise Exception(f">>> ERROR: request returned status code: {response.status_code}")
+            print(f">>> ERROR: request returned status code: {response.status_code}")
+            return response.status_code, response.json()
 
-    def save_raw_data(self, data: dict, dbx: dropbox.Dropbox, failed=False):
+    def save_raw_data(self, data: dict, failed=False):
         today = date.today().strftime(self._DATE_FMT)
         if failed:
             root = "/extracted-failed/"
@@ -130,10 +103,40 @@ class ApiConnector:
 
         data = json.dumps(data).encode("utf-8")
         save_name = root + f"FXCADUSD_{today}.json"
-        dbx.files_upload(data, save_name, mode=dropbox.files.WriteMode.overwrite)
+        self.dbx.files_upload(data, save_name, mode=dropbox.files.WriteMode.overwrite)
+
+    def download_expenses(self) -> None:
+        # TODO logging of metadata
+        self.dbx.files_download_to_file("data/expenses.xlsx", "/expenses.xlsx")
+
+    def extract_expenses(
+                         self, 
+                         path_to_expenses: Union[bytes, str, os.PathLike] = "data/expenses.xlsx"
+                         ) -> petl.Table:
+        """
+        Extracting expenses table from expenses excel file.
+
+        :param path_to_expenses: path identifier to the expenses table source file
+        :returns: petl-style data table with expenses data
+        :raies FileNotFoundError: if designated file does not exist 
+        """
+
+        if not isinstance(path_to_expenses, Path):
+            path_to_expenses = Path(path_to_expenses)
+
+        if not path_to_expenses.exists():
+            raise FileNotFoundError(f"File {path_to_expenses} does not exist.")
+        
+        loading_mode = {
+            ".xlsx": petl.io.fromxlsx,
+            ".xls": petl.io.fromxls,
+            ".csv": petl.io.fromcsv
+        }[path_to_expenses.suffix]
+
+        return loading_mode(str(path_to_expenses))
 
 
-class DataTransform:
+class Transform:
     """
     Objects of this type deal with data extracted from BOC servers.
     They will receive raw JSON-styled objects as input.
@@ -183,7 +186,7 @@ class DataTransform:
         return joined_table
 
 
-class Loader:
+class Load:
 
     def __init__(self, transformed_table: petl.Table) -> None:
         self.table = transformed_table
