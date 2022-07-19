@@ -26,6 +26,7 @@ class Extract:
     This class encapsulates the EXTRACT part of the ETL process.
     """
     _DATE_FMT = "%Y-%m-%d"
+    _DATETIME_FMT = "%m-%d-%Y-%H:%M:%S"
 
     def __init__(self, api_url: str, dbx: dropbox.Dropbox,
                  start_date: date, end_date: Union[date, None] = None):
@@ -93,14 +94,14 @@ class Extract:
         return response.status_code, response.json()
 
     def save_raw_data(self, data: dict, failed=False):
-        today = date.today().strftime(self._DATE_FMT)
+        now = datetime.now().strftime(self._DATETIME_FMT)
         if failed:
             root = "/extracted-failed/"
         else:
             root = "/extracted/"
 
         data = json.dumps(data).encode("utf-8")
-        save_name = root + f"FXCADUSD_{today}.json"
+        save_name = root + f"FXCADUSD_{now}.json"
         self.dbx.files_upload(data, save_name, mode=dropbox.files.WriteMode.overwrite)
 
     def download_expenses(self) -> None:
