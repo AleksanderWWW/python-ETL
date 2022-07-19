@@ -20,7 +20,12 @@ _DB_CONN = create_connection(_CONFIG["DB"]["path_to_db"])
 
 
 def main():
-    run_pipeline(_CONFIG, _DBX, _DB_CONN)
+    try:
+        run_pipeline(_CONFIG, _DBX, _DB_CONN)
+    finally:
+        # close resources
+        _DB_CONN.close()
+
 
 
 if __name__ == "__main__":
