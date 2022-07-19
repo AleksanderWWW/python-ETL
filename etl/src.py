@@ -17,29 +17,34 @@ from typing import (
 )
 
 import petl
+import dropbox
 import requests
 
 
-def load_expenses(path_to_expenses: Union[bytes, str, os.PathLike]) -> petl.Table:
+def download_expenses(dbx: dropbox.Dropbox) -> None:
+    # TODO logging of metadata
+    dbx.files_download_to_file("data/expenses.xlsx", "/expenses.xlsx")
+
+
+def extract_expenses(path_to_expenses: Union[bytes, str, os.PathLike] = "data/expenses.xlsx") -> petl.Table:
     """
-    Loading expenses table from expenses excel file.
+    Extracting expenses table from expenses excel file.
 
-    If file not found raises FileNotFoundError.
-
-    :path_to_expenses: path identifier to the expenses table source file
-    :returns: petl-style data table 
+    :param path_to_expenses: path identifier to the expenses table source file
+    :returns: petl-style data table with expenses data
+    :raies FileNotFoundError: if designated file does not exist 
     """
 
     if not isinstance(path_to_expenses, Path):
         path_to_expenses = Path(path_to_expenses)
 
-    if not path_to_expenses.exists:
+    if not path_to_expenses.exists():
         raise FileNotFoundError(f"File {path_to_expenses} does not exist.")
     
     loading_mode = {
-        "xlsx": petl.io.fromxlsx,
-        "xls": petl.io.fromxls,
-        "csv": petl.io.fromcsv
+        ".xlsx": petl.io.fromxlsx,
+        ".xls": petl.io.fromxls,
+        ".csv": petl.io.fromcsv
     }[path_to_expenses.suffix]
 
     return loading_mode(str(path_to_expenses))
@@ -62,6 +67,8 @@ class ApiConnector:
 
         if isinstance(end_date, date):
             self.end_date = end_date.strftime(self._DATE_FMT)
+        elif isinstance(end_date, str):
+            self.end_date = end_date
 
         self.api_url: str = self._create_api_url()
 
@@ -111,14 +118,22 @@ class ApiConnector:
         if response.status_code == 200:
             return response.json()
         else:
-            print(f">>> ERROR: request returned status code: {response.status_code}")
             print(response.json())
-            sys.exit()
+            raise Exception(f">>> ERROR: request returned status code: {response.status_code}")
 
-    # TODO: method to dump fetched data to a JSON file
+    def save_raw_data(self, data: dict, dbx: dropbox.Dropbox, failed=False):
+        today = date.today().strftime(self._DATE_FMT)
+        if failed:
+            root = "/extracted-failed/"
+        else:
+            root = "/extracted/"
+
+        data = json.dumps(data).encode("utf-8")
+        save_name = root + f"FXCADUSD_{today}.json"
+        dbx.files_upload(data, save_name, mode=dropbox.files.WriteMode.overwrite)
 
 
-class BOCDataTransform:
+class DataTransform:
     """
     Objects of this type deal with data extracted from BOC servers.
     They will receive raw JSON-styled objects as input.
@@ -139,8 +154,8 @@ class BOCDataTransform:
         self._raw_data = new_data
         self._data = new_data["observations"]
 
-    def get_data(self) -> dict:
-        return self._data["observations"]
+    def get_data(self) -> List:
+        return self._data
 
     def _parse_data(self) -> Tuple[List]:
         boc_dates = []
@@ -163,7 +178,16 @@ class BOCDataTransform:
 
         return table
 
+    def join_tables(self, expenses_table: petl.Table, rate_table: petl.Table) -> petl.Table:
+        joined_table = petl.leftjoin(expenses_table, rate_table, key='date')
+        return joined_table
 
-    
 
-    
+class Loader:
+
+    def __init__(self, transformed_table: petl.Table) -> None:
+        self.table = transformed_table
+
+    def load_to_db(self, conn, table_name: str = "expenses"):
+        petl.todb(self.table, conn, table_name)
+        conn.close()

@@ -8,7 +8,7 @@ from datetime import date, timedelta
 
 import yaml
 
-from boc_etl.src import ApiConnector
+from etl.src import ApiConnector
 
 
 class ApiConnectorTest(unittest.TestCase):
