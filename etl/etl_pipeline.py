@@ -1,8 +1,7 @@
 import sys
-import functools
 
 from sqlite3 import Connection  # for type hints
-from typing import Callable, Any, Tuple  # for type hints
+from typing import Tuple  # for type hints
 
 import dropbox  # for type hints
 

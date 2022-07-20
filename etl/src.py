@@ -4,7 +4,6 @@ ETL for data coming from Bank of Canada API
 
 import os
 import json
-import sys
 
 from pathlib import Path
 from datetime import date, datetime
