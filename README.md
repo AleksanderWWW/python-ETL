@@ -11,10 +11,10 @@ and refactor it.
 My aim is to make the project more modular and easier to use/debug.
 Additionally I plan to make more extensive use of Object Oriented Programming paradigm, 
 in comparison to the original, more 'linear' style of the project.
-Original project can be found in the GitHub repository [ [2] ](#2)
+Original project can be found in the GitHub repository [ [2] ](#2).
 
 When it comes to data loading part of the project I decided to store also the raw JSON data coming from 
-the Bank of Canada. For that purpose I used python Dropbox API [ [3] ](#3). Such a practice was recommended in another YouTube
+the Bank of Canada. For that purpose I used python connector to Dropbox API [ [3] ](#3). Such a practice was recommended in another YouTube
 video related to data pipelines [ [4] ](#4).
 
 ---
@@ -31,7 +31,7 @@ Below is the diagram that captures the high level data flow through the pipeline
 
 This data pipeline combines data from two sources.
 One of them is Bank of Canada.
-This institiution provides a free and open API with a wide variety of interesting data endpoints [ [5] ](#5)
+This institiution provides a free and open API with a wide variety of interesting data endpoints [ [5] ](#5).
 In this project I extract CAD-USD exchange rate for a given date range (defined in the configuration file).
 For that purpose I use python *requests* library [ [6] ](#6) to perform GET requests to the server.
 Those calls return JSON response in which contained are relevant data points which are then later
@@ -53,10 +53,15 @@ Extract part comprises of three steps:
 
 API data is obtained by interpolating the base URL with start and end dates and performing
 a GET request to this address. 
+Validation of this data is implemented by checking the status code of the response from the BOC server.
+If the code is 200, then the JSON file with response content is sent to Dropbox */extracted/* folder and the pipeline
+continues.
+In any other case the JSON file is sent to */extracted-failed/* folder and the execution of the pipeline stops with printing error message.
 
 Expenses are downloaded using *dropbox* python library [ [3] ](#3) and then the table is extracted from the file using *petl* package [ [7] ](#7) [ [8] ](#8).
 
-This part of the process returns a dictionary (from JSON data) and a *petl.Table* object (expenses data) that are then passed to the transform part of the pipeline.
+This part of the process returns a dictionary (from JSON data) and a *petl.Table* object (expenses data) that are then passed to the transform part of the pipeline
+(if the validation step allows for it).
 
 ---
 
