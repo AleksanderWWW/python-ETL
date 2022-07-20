@@ -180,7 +180,9 @@ class Transform:
         return table
 
     def join_tables(self, expenses_table: petl.Table, rate_table: petl.Table) -> petl.Table:
-        joined_table = petl.leftjoin(expenses_table, rate_table, key='date')
+        joined_table = petl.outerjoin(expenses_table, rate_table, key='date')
+        petl.filldown(joined_table, "rate")
+
         return joined_table
 
 
