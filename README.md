@@ -47,9 +47,9 @@ I decided to not store it locally, but rather with the use of **Dropbox** servic
 
 Extract part comprises of three steps:
 
-    * Extraction of raw JSON data from Bank of Canada API
-    * Extraction of expenses report from Dropbox
-    * Validation of BOC data and storage in Dropbox
+* Extraction of raw JSON data from Bank of Canada API
+* Extraction of expenses report from Dropbox
+* Validation of BOC data and storage in Dropbox
 
 API data is obtained by interpolating the base URL with start and end dates and performing
 a GET request to this address. 
