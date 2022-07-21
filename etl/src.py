@@ -2,6 +2,7 @@
 ETL for data coming from Bank of Canada API
 """
 
+import os
 import sys
 import json
 import sqlite3
@@ -43,13 +44,13 @@ class PipelineComponent(ABC):
 class Extract(PipelineComponent):
     _DATE_FMT = "%Y-%m-%d"
     _DATETIME_FMT = "%m-%d-%Y-%H:%M:%S"
-    _PATH_TO_EXPENSES = "data/expenses.xlsx"
 
     def __init__(self, 
                  api_url: str, 
                  dbx: dropbox.Dropbox,
                  start_date: date, 
-                 end_date: Union[date, None] = None) -> None:
+                 end_date: Union[date, None],
+                 path_to_expenses: Union[bytes, str, os.PathLike]) -> None:
                  
         self.api_url_template = api_url
         self.dbx = dbx
@@ -63,6 +64,8 @@ class Extract(PipelineComponent):
             self.end_date = end_date.strftime(self._DATE_FMT)
         elif isinstance(end_date, str):
             self.end_date = end_date
+
+        self.path_to_expenses = path_to_expenses
 
         self.api_url: str = self._create_api_url()
 
@@ -103,10 +106,10 @@ class Extract(PipelineComponent):
         self.dbx.files_upload(exchange_rates_dict, save_name, mode=dropbox.files.WriteMode.overwrite)
 
     def download_expenses(self) -> None:
-        self.dbx.files_download_to_file(self._PATH_TO_EXPENSES, "/expenses.xlsx")
+        self.dbx.files_download_to_file(self.path_to_expenses, "/expenses.xlsx")
 
     def extract_expenses(self) -> None:
-        path_to_expenses = Path(self._PATH_TO_EXPENSES)
+        path_to_expenses = Path(self.path_to_expenses)
 
         if not path_to_expenses.exists():
             raise FileNotFoundError(f"File {path_to_expenses} does not exist.")
@@ -192,8 +195,6 @@ class Transform(PipelineComponent):
 
 
 class Load(PipelineComponent):
-    _TABLE_NAME = "expenses_v2"
-    _DB_FILE = r"db\expenses.db"
 
     def __init__(self, transformed_table: petl.Table, db_file:str, table_name:str) -> None:
         self.table = transformed_table
@@ -202,7 +203,6 @@ class Load(PipelineComponent):
 
         self.db_conn: sqlite3.Connection
 
-        breakpoint()
 
     def create_db_connection(self) -> None:
         """ create a database connection to a SQLite database """

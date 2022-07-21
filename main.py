@@ -19,8 +19,8 @@ with open("api-token.txt", "r") as fp:
 
 
 def main():
-    inputs = [
-        (Extract, None), 
+    etl_components = [
+        (Extract, ("data/expenses.xlsx",)), 
         (Transform, None), 
         (Load, ("db\expenses.db", "expenses"))
         ]
@@ -32,7 +32,7 @@ def main():
         )
 
     etl_pipeline = Pipeline(
-        inputs,
+        etl_components,
         *init_args
     )
 
