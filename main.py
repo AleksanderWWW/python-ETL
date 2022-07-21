@@ -22,7 +22,7 @@ def main():
     etl_components = [
         (Extract, ("data/expenses.xlsx",)), 
         (Transform, None), 
-        (Load, ("db\expenses.db", "expenses"))
+        (Load, ("db/expenses.db", "expenses"))
         ]
     init_args = (
         _CONFIG["BOC"]["url"],
