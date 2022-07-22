@@ -1,8 +1,12 @@
 """
 Main runnable module
 """
+import os
+
 import yaml
 import dropbox
+
+from dotenv import load_dotenv
 
 from etl.src import Extract, Transform, Load
 from etl.etl_pipeline import Pipeline
@@ -12,10 +16,8 @@ with open("config.yaml", "r", encoding="utf-8") as config_fp:
     _CONFIG = yaml.safe_load(config_fp)
 
 # read api token
-with open("api-token.txt", "r") as fp:
-    _API_TOKEN = fp.read()
-    _DBX = dropbox.Dropbox(_API_TOKEN)
-
+load_dotenv()
+_DBX = dropbox.Dropbox(os.getenv("APP_TOKEN")) or None
 
 
 def main():
