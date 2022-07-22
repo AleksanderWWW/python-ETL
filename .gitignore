@@ -2,6 +2,6 @@ python-etl
 .idea
 __pycache__
 */__pycache__
-api-token.txt
+.env
 db/*
 data/*
