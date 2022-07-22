@@ -45,21 +45,21 @@ class Extract(PipelineComponent):
     _DATE_FMT = "%Y-%m-%d"
     _DATETIME_FMT = "%m-%d-%Y-%H:%M:%S"
 
-    def __init__(self, 
-                 api_url: str, 
+    def __init__(self,  
+                 boc_config_dict: dict,
                  dbx: dropbox.Dropbox,
-                 start_date: date, 
-                 end_date: Union[date, None],
                  path_to_expenses: Union[bytes, str, os.PathLike]) -> None:
                  
-        self.api_url_template = api_url
+        self.api_url_template = boc_config_dict["url"]
         self.dbx = dbx
 
+        start_date = boc_config_dict["startDate"]
         try:
             self.start_date = start_date.strftime(self._DATE_FMT)
         except AttributeError as e:
             raise TypeError(f"Expected start date as date, got {type(start_date)} instead.") from e
 
+        end_date = boc_config_dict["endDate"]
         if isinstance(end_date, date):
             self.end_date = end_date.strftime(self._DATE_FMT)
         elif isinstance(end_date, str):

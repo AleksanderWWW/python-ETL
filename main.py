@@ -27,10 +27,8 @@ def main():
         (Load, ("db/expenses.db", "expenses"))
         ]
     init_args = (
-        _CONFIG["BOC"]["url"],
+        _CONFIG["BOC"],
         _DBX,
-        _CONFIG["BOC"]["startDate"],
-        _CONFIG["BOC"]["endDate"]
         )
 
     etl_pipeline = Pipeline(
