@@ -20,8 +20,7 @@ class Pipeline:
             p_component: PipelineComponent = self.eventloop.get()
             comp_class = p_component.process_step
             comp_args = p_component.process_args
-            breakpoint()
-
+            
             if comp_args is None:
                 component_instance = comp_class(*self.args)
             else:
