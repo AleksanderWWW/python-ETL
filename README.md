@@ -65,6 +65,29 @@ This part of the process returns a dictionary (from JSON data) and a *petl.Table
 
 ---
 
+## Transform
+
+Transform step takes the data obtained in the extraction step as input and performs transformations as shown in the below diagram.
+
+![Transform step diagram](transform_step_diagram.jpg "Transform");
+
+
+First of all, the exchange rate JSON object is coverted to a *petl.Table* object. 
+It is then joined with the expenses table by the means of the outer join.
+Along the way the quantitative data points are converted to the *DECIMAL* format.
+
+Outer join leaves a lot of fields with *None* value in the column from expenses table.
+Therefore the table is subset to obtain only rows that have expense data present.
+The exchange rate is also filled down to account for weekends.
+For that reason the start date is being checked for being a week day.
+If it is a Saturday or a Sunday, then the start date should be updated to a Friday preceeding that day.
+
+The last transformation involves calculating the expense amount in CAD by multiplying the amount in USD by an exchange rate for a given date.
+
+The transformation step returns a *petl.Table* object that is fed to the loading step.
+
+---
+
 ## References
 
 <a id="1">[1]</a> https://www.youtube.com/watch?v=InLgSUw_ZOE&t=759s&ab_channel=Mean%2CMedianandMoose
