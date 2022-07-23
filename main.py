@@ -9,6 +9,7 @@ import dropbox
 from dotenv import load_dotenv
 
 from etl.src import Extract, Transform, Load
+from etl.pipeline_component import PipelineComponent
 from etl.etl_pipeline import Pipeline
 
 # read config
@@ -22,9 +23,9 @@ _DBX = dropbox.Dropbox(os.getenv("APP_TOKEN")) or None
 
 def main():
     etl_components = [
-        (Extract, ("data/expenses.xlsx",)), 
-        (Transform, None), 
-        (Load, ("db/expenses.db", "expenses"))
+        PipelineComponent(Extract, ("data/expenses.xlsx",)), 
+        PipelineComponent(Transform, None), 
+        PipelineComponent(Load, ("db/expenses.db", "expenses"))
         ]
     init_args = (
         _CONFIG["BOC"],

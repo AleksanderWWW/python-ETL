@@ -18,7 +18,7 @@ import dropbox
 import requests
 
 
-class PipelineComponent(ABC):
+class ProcessStep(ABC):
 
     @abstractproperty
     def result(self) -> Union[Tuple[Any], None]:
@@ -41,7 +41,7 @@ class PipelineComponent(ABC):
         ...
 
 
-class Extract(PipelineComponent):
+class Extract(ProcessStep):
     _DATE_FMT = "%Y-%m-%d"
     _DATETIME_FMT = "%m-%d-%Y-%H:%M:%S"
 
@@ -138,7 +138,7 @@ class Extract(PipelineComponent):
         return self.exchange_rates_dict, self.expenses_petl_table
 
 
-class Transform(PipelineComponent):
+class Transform(ProcessStep):
 
     def __init__(self, exchange_dict: dict, expenses_table: petl.Table) -> None:
         self.exchange_dict = exchange_dict
@@ -194,7 +194,7 @@ class Transform(PipelineComponent):
         return self.out_table,
 
 
-class Load(PipelineComponent):
+class Load(ProcessStep):
 
     def __init__(self, transformed_table: petl.Table, db_file:str, table_name:str) -> None:
         self.table = transformed_table
