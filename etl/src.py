@@ -54,10 +54,11 @@ class Extract(ProcessStep):
         self.dbx = dbx
 
         start_date = boc_config_dict["startDate"]
-        if start_date.weekday == 6:
+
+        if start_date.weekday() == 6:
             # Saturday
             start_date -= timedelta(days=1)
-        elif start_date.weekday == 0:
+        elif start_date.weekday() == 0:
             # Sunday
             start_date -= timedelta(days=2)
         
@@ -200,6 +201,7 @@ class Transform(ProcessStep):
         self.add_cad_field()
 
     def result(self) -> Tuple[petl.Table]:
+        print(self.out_table)
         return self.out_table,
 
 
