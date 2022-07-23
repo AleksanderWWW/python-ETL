@@ -25,7 +25,8 @@ def main():
     etl_components = [
         PipelineComponent(Extract, ("data/expenses.xlsx",)), 
         PipelineComponent(Transform, None), 
-        PipelineComponent(Load, ("db/expenses.db", "expenses"))
+        PipelineComponent(Load, (_CONFIG["DB"]["path_to_db"], 
+                                _CONFIG["DB"]["table_name"]))
         ]
     init_args = (
         _CONFIG["BOC"],
