@@ -9,7 +9,7 @@ import sqlite3
 import decimal
 
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from abc import ABC, abstractmethod, abstractproperty
 from typing import Union, Any, Tuple 
 
@@ -54,6 +54,13 @@ class Extract(ProcessStep):
         self.dbx = dbx
 
         start_date = boc_config_dict["startDate"]
+        if start_date.weekday == 6:
+            # Saturday
+            start_date -= timedelta(days=1)
+        elif start_date.weekday == 0:
+            # Sunday
+            start_date -= timedelta(days=2)
+        
         try:
             self.start_date = start_date.strftime(self._DATE_FMT)
         except AttributeError as e:
@@ -171,6 +178,7 @@ class Transform(ProcessStep):
             key='date'
             )
 
+    def subset_table(self) -> None:
         self.out_table = petl.filldown(self.out_table, "rate")
         
         self.out_table = petl.select(
@@ -188,6 +196,7 @@ class Transform(ProcessStep):
     def run(self) -> None:
         self.create_exchange_petl_table()
         self.join_tables()
+        self.subset_table()
         self.add_cad_field()
 
     def result(self) -> Tuple[petl.Table]:
