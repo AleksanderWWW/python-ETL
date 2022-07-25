@@ -143,6 +143,7 @@ class Extract(ProcessStep):
 
         self.extract_expenses()
 
+    @property
     def result(self) -> Tuple[dict, petl.Table]:
         return self.exchange_rates_dict, self.expenses_petl_table
 
@@ -201,6 +202,7 @@ class Transform(ProcessStep):
         self.subset_table()
         self.add_cad_field()
 
+    @property
     def result(self) -> Tuple[petl.Table]:
         print(self.out_table)
         return self.out_table,
@@ -238,5 +240,6 @@ class Load(ProcessStep):
         finally:
             self.db_conn.close()
 
+    @property
     def result(self) -> None:
         print("Data successfully loaded")

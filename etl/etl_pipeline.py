@@ -34,4 +34,4 @@ class Pipeline:
                 component_instance = comp_class(*self.args, *comp_args)
 
             component_instance.run()
-            self.args = component_instance.result()           
+            self.args = component_instance.result           
