@@ -23,7 +23,7 @@ video related to data pipelines [ [4] ](#4).
 
 Below is the diagram that captures the high level data flow through the pipeline.
 
-![ETL pipeline diagram](media\ETL-diagram.jpg "ETL")
+![ETL pipeline diagram](media/ETL-diagram.jpg "ETL")
 
 ---
 
@@ -69,7 +69,7 @@ This part of the process returns a dictionary (from JSON data) and a *petl.Table
 
 Transform step takes the data obtained in the extraction step as input and performs transformations as shown in the below diagram.
 
-![Transform step diagram](media\transform_step_diagram.jpg "Transform")
+![Transform step diagram](media/transform_step_diagram.jpg "Transform")
 
 
 First of all, the exchange rate JSON object is coverted to a *petl.Table* object. 
@@ -98,7 +98,7 @@ that can create an object which behaves in a way enabling the *petl* module to e
 Below is shown a schema of a table that needs to be present in the database.
 This table will contain the data obtained in the preceeding steps of the project.
 
-![Final table schema](media\table_schema.jpg "Schema of the transformed table")
+![Final table schema](media/table_schema.jpg "Schema of the transformed table")
 
 
 
