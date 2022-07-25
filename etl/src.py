@@ -5,7 +5,6 @@ ETL for data coming from Bank of Canada API
 import os
 import sys
 import json
-import sqlite3
 import decimal
 
 from pathlib import Path
@@ -16,6 +15,8 @@ from typing import Union, Any, Tuple
 import petl
 import dropbox
 import requests
+
+from etl.database_types import DbObjectCreator, DbObject
 
 
 class ProcessStep(ABC):
@@ -207,21 +208,24 @@ class Transform(ProcessStep):
 
 class Load(ProcessStep):
 
-    def __init__(self, transformed_table: petl.Table, db_file:str, table_name:str) -> None:
+    def __init__(self, transformed_table: petl.Table, db_object_creator: DbObjectCreator,
+                 db_file:str, table_name:str) -> None:
         self.table = transformed_table
         self.db_file = db_file
         self.table_name = table_name
 
-        self.db_conn: sqlite3.Connection
+        # database connection
+        self.db_object_creator = db_object_creator
+        self.db_conn: DbObject
 
 
     def create_db_connection(self) -> None:
         """ create a database connection to a SQLite database """
         
         try:
-            self.db_conn = sqlite3.connect(self.db_file)
-            print("SQLTE3 connection open")
-        except sqlite3.Error as e:
+            self.db_conn = self.db_object_creator(self.db_file)
+            print("Database connection open")
+        except Exception as e:
             print(e)
 
     def load_to_db(self) -> None:

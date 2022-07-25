@@ -2,6 +2,7 @@
 Main runnable module
 """
 import os
+import sqlite3  # for testing purposes
 
 import yaml
 import dropbox
@@ -25,7 +26,8 @@ def main():
     etl_components = [
         PipelineComponent(Extract, ("data/expenses.xlsx",)), 
         PipelineComponent(Transform, None), 
-        PipelineComponent(Load, (_CONFIG["DB"]["path_to_db"], 
+        PipelineComponent(Load, (sqlite3.connect,
+                                _CONFIG["DB"]["path_to_db"], 
                                 _CONFIG["DB"]["table_name"]))
         ]
     init_args = (
