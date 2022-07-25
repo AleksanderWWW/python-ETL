@@ -81,6 +81,8 @@ class Extract(ProcessStep):
         self.exchange_rates_dict: dict
         self.api_call_status_code: int
 
+        self.now: str
+
         self.expenses_petl_table: petl.Table
 
     def _create_api_url(self) -> str:
@@ -100,7 +102,7 @@ class Extract(ProcessStep):
         self.api_call_status_code = response.status_code
 
     def save_raw_data(self) -> None:
-        now = datetime.now().strftime(self._DATETIME_FMT)
+        self.now = datetime.now().strftime(self._DATETIME_FMT)
         failed: bool = (self.api_call_status_code != 200)
 
         if failed:
@@ -110,7 +112,7 @@ class Extract(ProcessStep):
             root = "/extracted/"
 
         exchange_rates_dict = json.dumps(self.exchange_rates_dict).encode("utf-8")
-        save_name = root + f"FXCADUSD_{now}.json"
+        save_name = root + f"FXCADUSD_{self.now}.json"
 
         self.dbx.files_upload(exchange_rates_dict, save_name, mode=dropbox.files.WriteMode.overwrite)
 
