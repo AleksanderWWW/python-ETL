@@ -23,7 +23,7 @@ video related to data pipelines [ [4] ](#4).
 
 Below is the diagram that captures the high level data flow through the pipeline.
 
-![ETL pipeline diagram](ETL-diagram.jpg "ETL")
+![ETL pipeline diagram](media\ETL-diagram.jpg "ETL")
 
 ---
 
@@ -69,7 +69,7 @@ This part of the process returns a dictionary (from JSON data) and a *petl.Table
 
 Transform step takes the data obtained in the extraction step as input and performs transformations as shown in the below diagram.
 
-![Transform step diagram](transform_step_diagram.jpg "Transform");
+![Transform step diagram](media\transform_step_diagram.jpg "Transform")
 
 
 First of all, the exchange rate JSON object is coverted to a *petl.Table* object. 
@@ -85,6 +85,22 @@ If it is a Saturday or a Sunday, then the start date should be updated to a Frid
 The last transformation involves calculating the expense amount in CAD by multiplying the amount in USD by an exchange rate for a given date.
 
 The transformation step returns a *petl.Table* object that is fed to the loading step.
+
+---
+
+## Load
+
+The last step of the process is concerned with loading transformed data into a database.
+For testing purposes an *sqlite* local database was selected, however the implementation
+resides in the *main.py* module. The *etl.src.Load* class accepts any database object creator*
+that can create an object which behaves in a way enabling the *petl* module to execute neccessary queries [ [9] ](#9).
+
+Below is shown a schema of a table that needs to be present in the database.
+This table will contain the data obtained in the preceeding steps of the project.
+
+![Final table schema](media\table_schema.jpg "Schema of the transformed table")
+
+
 
 ---
 
@@ -105,6 +121,8 @@ The transformation step returns a *petl.Table* object that is fed to the loading
 <a id="7">[7]</a> https://petl.readthedocs.io/en/stable/intro.html
 
 <a id="8">[8]</a> https://petl.readthedocs.io/en/stable/io.html#petl.io.xlsx.fromxlsx
+
+<a id="9">[9]</a> https://petl.readthedocs.io/en/stable/_modules/petl/io/db.html
 
 ---
 
